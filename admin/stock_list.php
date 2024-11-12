@@ -13,6 +13,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
 $query = "SELECT * FROM stock";
 $result = mysqli_query($conn, $query);
 
+// Prevent the browser from caching the page
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 ?>
 
 <!DOCTYPE html>

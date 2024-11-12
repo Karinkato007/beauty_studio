@@ -1,8 +1,28 @@
-<!-- index.php (Homepage) -->
 <?php
 session_start();
 $isLoggedIn = isset($_SESSION['username']); // Check if user is logged in
 $username = $isLoggedIn ? $_SESSION['username'] : '';
+$email = isset($_SESSION['email']) ? $_SESSION['email'] : ''; // Check if email exists in session
+
+// Debugging: Check if session values are set correctly
+// if (!$isLoggedIn) {
+//     // echo "User is not logged in.";
+// } else {
+//     echo "Logged in as: " . htmlspecialchars($username);
+//     echo "Email: " . htmlspecialchars($email);
+// }
+
+// Check if the user already has an appointment
+$hasBooking = false;
+if ($isLoggedIn && $email) {
+    // Assuming you have a bookings table and the 'status' column tracks booking status
+    include('includes/db.php');
+    $query = "SELECT * FROM bookings WHERE email = '$email' AND status IN ('pending', 'confirmed') LIMIT 1";
+    $result = mysqli_query($conn, $query);
+    if (mysqli_num_rows($result) > 0) {
+        $hasBooking = true;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +52,8 @@ $username = $isLoggedIn ? $_SESSION['username'] : '';
                 <div class="hidden md:flex items-center space-x-1">
                     <?php if ($isLoggedIn): ?>
                         <span class="py-5 px-3 text-gray-700">Hello, <?php echo htmlspecialchars($username); ?>!</span>
+
+                        <!-- Logout Button -->
                         <a href="user/logout.php" class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600">Logout</a>
                     <?php else: ?>
                         <a href="user/login.php" class="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Login</a>
@@ -48,7 +70,25 @@ $username = $isLoggedIn ? $_SESSION['username'] : '';
             <div class="text-center">
                 <h1 class="text-white text-5xl font-bold">Welcome to Our Beauty Studio</h1>
                 <p class="text-gray-300 mt-4">Your beauty, our passion. Book an appointment today!</p>
-                <a href="booking/booking.php" class="mt-6 inline-block bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600">Book Now</a>
+                
+                <!-- Conditional Book Now Button -->
+                <?php if ($isLoggedIn): ?>
+                    <?php if ($hasBooking): ?>
+                        <a href="./booking/my_appointment.php" 
+                           class="mt-6 inline-block bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600">
+                           View My Appointment
+                        </a>
+                    <?php else: ?>
+                        <a href="./booking/booking.php" 
+                           class="mt-6 inline-block bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600">
+                           Book Now
+                        </a>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <a href="./user/login.php" class="mt-6 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                       Login to Book Now
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </section>

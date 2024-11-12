@@ -5,6 +5,11 @@ include('../includes/db.php');
 // Fetch all bookings from the database
 $query = "SELECT * FROM bookings ORDER BY appointment_time DESC";
 $result = mysqli_query($conn, $query);
+
+// Prevent the browser from caching the page
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +22,7 @@ $result = mysqli_query($conn, $query);
     <title>Manage Bookings</title>
 </head>
 <body class="bg-gray-100">
+    <div class="bg-gray-100">
     <header class="bg-gray-800 text-white p-5">
         <h1 class="text-center text-3xl">Manage Bookings</h1>
     </header>
@@ -39,9 +45,9 @@ $result = mysqli_query($conn, $query);
                     <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td class="border px-4 py-2"><?php echo $row['id']; ?></td>
-                        <td class="border px-4 py-2"><?php echo $row['name']; ?></td>
+                        <td class="border px-4 py-2"><?php echo $row['username']; ?></td>
                         <td class="border px-4 py-2"><?php echo $row['email']; ?></td>
-                        <td class="border px-4 py-2"><?php echo $row['service']; ?></td>
+                        <td class="border px-4 py-2"><?php echo $row['services']; ?></td>
                         <td class="border px-4 py-2"><?php echo $row['appointment_time']; ?></td>
                         <td class="border px-4 py-2">
                             <a href="edit_booking.php?id=<?php echo $row['id']; ?>" class="text-blue-500">Edit</a> | 
@@ -53,5 +59,6 @@ $result = mysqli_query($conn, $query);
             </table>
         </div>
     </main>
+    </div>
 </body>
 </html>

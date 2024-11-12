@@ -1,22 +1,19 @@
-<!-- admin/index.php -->
 <?php
 session_start();
-include('../includes/db.php'); // Make sure this file establishes a connection and defines $conn
 
-// Check if the user is logged in and has admin privileges
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    header('Location: ../user/login.php'); // Redirect to login if not an admin
-    exit;
+// Include the database connection
+include('../includes/db.php');
+
+// Check if the employee is logged in
+if (!isset($_SESSION['user_id'])) { // Updated session variable
+    header("Location: login.php");
+    exit();
 }
 
-// Fetch stock data
-$query = "SELECT * FROM stock";
-$result = mysqli_query($conn, $query);
-
-// Check for query success
-if (!$result) {
-    die("Database query failed: " . mysqli_error($conn)); // Error handling if query fails
-}
+// Prevent the browser from caching the page
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
 ?>
 
 <!DOCTYPE html>
@@ -24,53 +21,90 @@ if (!$result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../css/tailwind.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
 </head>
 <body class="bg-gray-100">
-    <header class="bg-gray-800 text-white p-5">
-        <h1 class="text-center text-3xl">Admin Dashboard</h1>
-        <div class="text-center mt-2">
-            <a href="../user/logout.php" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-                Logout
-            </a>
+
+    <!-- Navigation -->
+    <header class="bg-blue-700 shadow-lg p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-white text-3xl font-bold">Admin Dashboard</h1>
+            <a href="../user/logout.php" class="text-white bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 border border-red-700">Logout</a>
         </div>
     </header>
 
-    <main class="py-10">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl mb-6">Manage Your Studio</h2>
-            <div class="space-y-4">
-                <a href="view_booking.php" class="block bg-blue-500 text-white px-6 py-3 rounded-lg text-center">View & Manage Bookings</a>
-                <a href="manage_stock.php" class="block bg-green-500 text-white px-6 py-3 rounded-lg text-center">View & Manage Stock</a>
+    <main class="container mx-auto py-10">
+        <!-- Dashboard Overview -->
+        <h2 class="text-3xl font-semibold text-gray-800 mb-8">Dashboard Overview</h2>
+
+        <!-- Real-time Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Bookings -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-blue-500">
+                <h3 id="total_bookings" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">Total Bookings</p>
             </div>
-            
-            <!-- Display Stock Data -->
-            <h3 class="text-xl mt-8">Current Stock</h3>
-            <?php if (mysqli_num_rows($result) > 0): ?>
-                <table class="min-w-full bg-white border border-gray-200 mt-4">
-                    <thead>
-                        <tr>
-                            <th class="border px-4 py-2">Product Name</th>
-                            <th class="border px-4 py-2">Quantity</th>
-                            <th class="border px-4 py-2">Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                            <tr>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($row['product_name']); ?></td>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($row['quantity']); ?></td>
-                                <td class="border px-4 py-2"><?php echo htmlspecialchars($row['last_updated']); ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p class="mt-4">No stock available.</p>
-            <?php endif; ?>
+
+            <!-- Total Stock -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-green-500">
+                <h3 id="total_stock" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">Products in Stock</p>
+            </div>
+
+            <!-- Messages -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-yellow-500">
+                <h3 id="total_messages" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">New Messages</p>
+            </div>
+
+            <!-- Admin Users (Optional) -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-red-500">
+                <h3 id="total_admins" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">Admin Users</p>
+            </div>
+        </div>
+
+        <!-- Manage Sections -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Manage Your Studio</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="view_booking.php" class="bg-blue-600 text-white p-6 rounded-lg shadow-md text-center font-semibold text-lg transition hover:bg-blue-700 hover:shadow-lg">
+                    View & Manage Bookings
+                </a>
+                <a href="manage_stock.php" class="bg-green-600 text-white p-6 rounded-lg shadow-md text-center font-semibold text-lg transition hover:bg-green-700 hover:shadow-lg">
+                    View & Manage Stock
+                </a>
+            </div>
         </div>
     </main>
+
+    <script>
+        // Function to fetch the latest overview data
+        function fetchOverviewData() {
+            $.ajax({
+                url: 'get_overview_data.php',
+                type: 'GET',
+                success: function(response) {
+                    // Update the overview section with new data
+                    $('#total_bookings').text(response.total_bookings);
+                    $('#total_stock').text(response.total_stock);
+                    $('#total_messages').text(response.total_messages);
+                    $('#total_admins').text(response.total_admins);
+                },
+                error: function(error) {
+                    console.log("Error fetching overview data:", error);
+                }
+            });
+        }
+
+        // Fetch the data every 10 seconds (or any interval you prefer)
+        setInterval(fetchOverviewData, 10000); // 10 seconds
+
+        // Initial fetch when page loads
+        fetchOverviewData();
+    </script>
 </body>
 </html>
