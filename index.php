@@ -108,7 +108,7 @@ $username = $isLoggedIn ? $_SESSION['username'] : '';
 
     <!-- Footer -->
     <footer class="bg-gray-800 py-6 text-white text-center">
-        <p>&copy; 2024 Makeup Studio. All Rights Reserved.</p>
+        <p>&copy; 2024 Beauty Studio. All Rights Reserved.</p>
     </footer>
 </body>
 </html>
