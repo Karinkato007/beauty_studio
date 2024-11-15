@@ -1,7 +1,6 @@
 <?php
 include('../includes/db.php');
 // Assuming you have already established a connection to the database
-// Example: $conn = mysqli_connect("localhost", "username", "password", "database");
 
 $query = "SELECT * FROM bookings"; // Replace 'bookings' with your actual table name
 $result = mysqli_query($conn, $query);
@@ -43,9 +42,6 @@ if (!$result) {
                 </thead>
                 <tbody>
                     <?php
-                    include('../includes/db.php');
-                    $query = "SELECT * FROM bookings";
-                    $result = mysqli_query($conn, $query);
                     while ($row = mysqli_fetch_assoc($result)): ?>
                         <tr id="booking-<?php echo $row['id']; ?>">
                             <td class="border px-4 py-2"><?php echo $row['id']; ?></td>
@@ -59,8 +55,14 @@ if (!$result) {
                             <td class="border px-4 py-2">
                                 <?php if ($row['status'] != 'confirmed'): ?>
                                     <button onclick="confirmBooking(<?php echo $row['id']; ?>)" 
-                                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                                         Confirm
+                                    </button>
+                                <?php endif; ?>
+                                <?php if ($row['status'] != 'canceled'): ?>
+                                    <button onclick="cancelBooking(<?php echo $row['id']; ?>)" 
+                                        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                        Cancel
                                     </button>
                                 <?php endif; ?>
                             </td>
@@ -75,37 +77,75 @@ if (!$result) {
 
     <script>
         function confirmBooking(bookingId) {
-            $.ajax({
-                url: 'confirm_booking_ajax.php',
-                type: 'POST',
-                data: { id: bookingId },
-                success: function(response) {
-                    if (response.success) {
-                        // Update the status cell in the table
-                        $('#status-' + bookingId).text('Confirmed');
-                        // Show success notification
-                        showNotification('Booking confirmed successfully!', 'success');
-                    } else {
+            // Update the status immediately in the table
+                $('#status-' + bookingId).text('Confirming...');
+
+                $.ajax({
+                    url: 'confirm_booking_ajax.php',
+                    type: 'POST',
+                    data: { id: bookingId },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update the status cell in the table
+                            $('#status-' + bookingId).text('Confirmed');
+                            // Show success notification
+                            showNotification('Booking confirmed successfully!', 'success');
+                        } else {
+                            // In case of error, restore the old status
+                            $('#status-' + bookingId).text('Failed');
+                            // Show error notification
+                            showNotification(response.message || 'Failed to confirm booking.', 'error');
+                        }
+                    },
+                    error: function() {
+                        // In case of error, restore the old status
+                        $('#status-' + bookingId).text('Failed');
                         // Show error notification
-                        showNotification(response.message || 'Failed to confirm booking.', 'error');
+                        showNotification('An error occurred. Please try again.', 'error');
                     }
-                },
-                error: function() {
-                    // Show error notification
-                    showNotification('An error occurred. Please try again.', 'error');
-                }
-            });
-        }
+                });
+            }
 
-        function showNotification(message, type) {
-            const notification = $('#notification');
-            notification.removeClass('hidden');
-            notification.text(message);
-            notification.removeClass('bg-green-500 bg-red-500');
-            notification.addClass(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+            function cancelBooking(bookingId) {
+                // Update the status immediately in the table
+                $('#status-' + bookingId).text('Canceling...');
 
-            setTimeout(() => notification.addClass('hidden'), 3000);
-        }
+                $.ajax({
+                    url: 'cancel_booking_ajax.php',
+                    type: 'POST',
+                    data: { id: bookingId },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update the status cell in the table
+                            $('#status-' + bookingId).text('Canceled');
+                            // Show success notification
+                            showNotification('Booking canceled successfully!', 'success');
+                        } else {
+                            // In case of error, restore the old status
+                            $('#status-' + bookingId).text('Failed');
+                            // Show error notification
+                            showNotification(response.message || 'Failed to cancel booking.', 'error');
+                        }
+                    },
+                    error: function() {
+                        // In case of error, restore the old status
+                        $('#status-' + bookingId).text('Failed');
+                        // Show error notification
+                        showNotification('An error occurred. Please try again.', 'error');
+                    }
+                });
+            }
+
+            function showNotification(message, type) {
+                const notification = $('#notification');
+                notification.removeClass('hidden');
+                notification.text(message);
+                notification.removeClass('bg-green-500 bg-red-500');
+                notification.addClass(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+
+                setTimeout(() => notification.addClass('hidden'), 3000);
+            }
+
     </script>
 </body>
 </html>

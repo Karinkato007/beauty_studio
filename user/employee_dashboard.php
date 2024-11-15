@@ -11,27 +11,9 @@ if (!isset($_SESSION['user_id'])) { // Updated session variable
     exit();
 }
 
-// Debugging line to see if session ID is set
-// echo "Session ID: " . $_SESSION['user_id']; 
-
 // Initialize variables
-$messages = [];
 $stocks = [];
 $bookings = [];
-
-// Fetch contact messages
-$queryMessages = "SELECT * FROM contact_messages";
-$resultMessages = $conn->query($queryMessages);
-
-if (!$resultMessages) {
-    die("Query failed: " . $conn->error); // Debugging line for errors
-}
-
-if ($resultMessages->num_rows > 0) {
-    while ($row = $resultMessages->fetch_assoc()) {
-        $messages[] = $row;
-    }
-}
 
 // Fetch stocks
 $queryStocks = "SELECT * FROM stock";
@@ -108,7 +90,7 @@ if ($resultBookings->num_rows > 0) {
         <?php endif; ?>
     </div>
 
-    <!-- Inside Bookings Section in employee_dashboard.php -->
+    <!-- Bookings Section -->
     <div class="container mx-auto mt-8">
         <h2 class="text-2xl font-bold">Bookings</h2>
 
@@ -136,7 +118,6 @@ if ($resultBookings->num_rows > 0) {
         <?php else: ?>
             <p>No bookings available.</p>
         <?php endif; ?>
-    </div>
     </div>
 </body>
 </html>
