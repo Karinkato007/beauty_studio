@@ -48,7 +48,7 @@ header("Expires: 0");
             <form action="" method="POST" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" name="name" value="<?php echo $booking['name']; ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="text" name="name" value="<?php echo $booking['username']; ?>" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Email</label>
@@ -57,10 +57,10 @@ header("Expires: 0");
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Service</label>
                     <select name="service" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="Makeup" <?php echo $booking['service'] == 'Makeup' ? 'selected' : ''; ?>>Makeup</option>
-                        <option value="Nail Art" <?php echo $booking['service'] == 'Nail Art' ? 'selected' : ''; ?>>Nail Art</option>
-                        <option value="Lashes" <?php echo $booking['service'] == 'Lashes' ? 'selected' : ''; ?>>Lashes</option>
-                        <option value="Hairstyle" <?php echo $booking['service'] == 'Hairstyle' ? 'selected' : ''; ?>>Hairstyle</option>
+                        <option value="Makeup" <?php echo $booking['services'] == 'Makeup' ? 'selected' : ''; ?>>Makeup</option>
+                        <option value="Nail Art" <?php echo $booking['services'] == 'Nail Art' ? 'selected' : ''; ?>>Nail Art</option>
+                        <option value="Lashes" <?php echo $booking['services'] == 'Lashes' ? 'selected' : ''; ?>>Lashes</option>
+                        <option value="Hairstyle" <?php echo $booking['services'] == 'Hairstyle' ? 'selected' : ''; ?>>Hairstyle</option>
                     </select>
                 </div>
                 <div>

@@ -1,38 +1,47 @@
 <?php
 include('../includes/db.php');
 
-// Fetch total bookings
-$bookings_query = "SELECT COUNT(*) AS total_bookings FROM bookings";
-$bookings_result = mysqli_query($conn, $bookings_query);
-$bookings_data = mysqli_fetch_assoc($bookings_result);
-$total_bookings = $bookings_data['total_bookings'];
-
-// Fetch total stock
-$stock_query = "SELECT SUM(quantity) AS total_stock FROM stock";
-$stock_result = mysqli_query($conn, $stock_query);
-$stock_data = mysqli_fetch_assoc($stock_result);
-$total_stock = $stock_data['total_stock'];
-
-// Fetch total messages
-$messages_query = "SELECT COUNT(*) AS total_messages FROM contact_messages";
-$messages_result = mysqli_query($conn, $messages_query);
-$messages_data = mysqli_fetch_assoc($messages_result);
-$total_messages = $messages_data['total_messages'];
-
-// Fetch total admin users (optional)
-$admin_query = "SELECT COUNT(*) AS total_admins FROM users WHERE role = 'admin'";
-$admin_result = mysqli_query($conn, $admin_query);
-$admin_data = mysqli_fetch_assoc($admin_result);
-$total_admins = $admin_data['total_admins'];
-
-// Return data as JSON
+// Initialize response array
 $response = [
-    'total_bookings' => $total_bookings,
-    'total_stock' => $total_stock,
-    'total_messages' => $total_messages,
-    'total_admins' => $total_admins
+    'total_bookings' => 0,
+    'pending_bookings' => 0,
+    'confirmed_bookings' => 0,
+    'total_stock' => 0
 ];
 
+// Fetch total bookings
+$totalQuery = "SELECT COUNT(*) AS total FROM bookings";
+$result = mysqli_query($conn, $totalQuery);
+if ($result) {
+    $row = mysqli_fetch_assoc($result);
+    $response['total_bookings'] = $row['total'];
+}
+
+// Fetch pending bookings
+$pendingQuery = "SELECT COUNT(*) AS pending FROM bookings WHERE status = 'pending'";
+$result = mysqli_query($conn, $pendingQuery);
+if ($result) {
+    $row = mysqli_fetch_assoc($result);
+    $response['pending_bookings'] = $row['pending'];
+}
+
+// Fetch confirmed bookings
+$confirmedQuery = "SELECT COUNT(*) AS confirmed FROM bookings WHERE status = 'confirmed'";
+$result = mysqli_query($conn, $confirmedQuery);
+if ($result) {
+    $row = mysqli_fetch_assoc($result);
+    $response['confirmed_bookings'] = $row['confirmed'];
+}
+
+// Fetch total stock
+$stockQuery = "SELECT SUM(quantity) AS total_stock FROM stock";
+$result = mysqli_query($conn, $stockQuery);
+if ($result) {
+    $row = mysqli_fetch_assoc($result);
+    $response['total_stock'] = $row['total_stock'];
+}
+
+// Return JSON response
 header('Content-Type: application/json');
 echo json_encode($response);
 ?>

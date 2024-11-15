@@ -108,7 +108,7 @@ if ($resultBookings->num_rows > 0) {
         <?php endif; ?>
     </div>
 
-    <!-- Bookings Section -->
+    <!-- Inside Bookings Section in employee_dashboard.php -->
     <div class="container mx-auto mt-8">
         <h2 class="text-2xl font-bold">Bookings</h2>
 
@@ -119,40 +119,22 @@ if ($resultBookings->num_rows > 0) {
                         <th class="border px-4 py-2">Customer Name</th>
                         <th class="border px-4 py-2">Date and Time</th>
                         <th class="border px-4 py-2">Service</th>
-                        <!-- <th class="border px-4 py-2">Status</th> -->
+                        <th class="border px-4 py-2">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($bookings as $booking): ?>
                         <tr>
-                            <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['name']); ?></td>
+                            <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['username']); ?></td>
                             <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['appointment_time']); ?></td>
-                            <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['service']); ?></td>
-                            <!-- <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['status']); ?></td> -->
+                            <td class="border px-4 py-2"><?php echo htmlspecialchars($booking['services']); ?></td>
+                            <td class="border px-4 py-2"><?php echo ucfirst($booking['status']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php else: ?>
             <p>No bookings available.</p>
-        <?php endif; ?>
-
-    <!-- Contact Messages Section -->
-    <div class="container mx-auto mt-8">
-        <h2 class="text-2xl font-bold">Contact Messages</h2>
-
-        <?php if (!empty($messages)): ?>
-            <?php foreach ($messages as $message): ?>
-                <div class="bg-white shadow-md p-4 mt-4">
-                    <p><strong>Name:</strong> <?php echo htmlspecialchars($message['name']); ?></p>
-                    <p><strong>Email:</strong> <?php echo htmlspecialchars($message['email']); ?></p>
-                    <p><strong>Message:</strong> <?php echo htmlspecialchars($message['message']); ?></p>
-                    <p><strong>Date:</strong> <?php echo htmlspecialchars($message['created_at']); ?></p>
-                    <hr>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>No messages to display.</p>
         <?php endif; ?>
     </div>
     </div>

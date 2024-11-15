@@ -47,22 +47,22 @@ header("Expires: 0");
                 <p class="text-gray-600 mt-3">Total Bookings</p>
             </div>
 
-            <!-- Total Stock -->
+            <!-- Pending Bookings -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-yellow-500">
+                <h3 id="pending_bookings" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">Pending Bookings</p>
+            </div>
+
+            <!-- Confirmed Bookings -->
             <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-green-500">
+                <h3 id="confirmed_bookings" class="text-5xl font-bold text-gray-800">0</h3>
+                <p class="text-gray-600 mt-3">Confirmed Bookings</p>
+            </div>
+
+            <!-- Total Stock -->
+            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-red-500">
                 <h3 id="total_stock" class="text-5xl font-bold text-gray-800">0</h3>
                 <p class="text-gray-600 mt-3">Products in Stock</p>
-            </div>
-
-            <!-- Messages -->
-            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-yellow-500">
-                <h3 id="total_messages" class="text-5xl font-bold text-gray-800">0</h3>
-                <p class="text-gray-600 mt-3">New Messages</p>
-            </div>
-
-            <!-- Admin Users (Optional) -->
-            <div class="bg-white shadow-lg rounded-lg p-6 text-center transition hover:scale-105 border-t-4 border-red-500">
-                <h3 id="total_admins" class="text-5xl font-bold text-gray-800">0</h3>
-                <p class="text-gray-600 mt-3">Admin Users</p>
             </div>
         </div>
 
@@ -87,12 +87,13 @@ header("Expires: 0");
             $.ajax({
                 url: 'get_overview_data.php',
                 type: 'GET',
+                dataType: 'json', // Expect JSON data from the server
                 success: function(response) {
                     // Update the overview section with new data
                     $('#total_bookings').text(response.total_bookings);
+                    $('#pending_bookings').text(response.pending_bookings);
+                    $('#confirmed_bookings').text(response.confirmed_bookings);
                     $('#total_stock').text(response.total_stock);
-                    $('#total_messages').text(response.total_messages);
-                    $('#total_admins').text(response.total_admins);
                 },
                 error: function(error) {
                     console.log("Error fetching overview data:", error);
