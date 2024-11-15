@@ -48,30 +48,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $end_time = $appointment_end_time->format('Y-m-d H:i:s');
 
     // Check if the user already has an active booking
-    $check_query = "SELECT * FROM bookings WHERE email = '$email' AND status IN ('pending', 'confirmed')";
-    $check_result = mysqli_query($conn, $check_query);
+    $check_query = $conn->prepare(
+        "SELECT * FROM bookings 
+         WHERE email = ? 
+           AND status IN ('pending', 'confirmed') 
+           AND appointment_time > NOW()"
+    );
+    $check_query->bind_param("s", $email);
+    $check_query->execute();
+    $check_result = $check_query->get_result();
 
-    if (mysqli_num_rows($check_result) > 0) {
-        // Redirect to booking page with error message if user already has an active booking
+    if ($check_result->num_rows > 0) {
+        $existingBooking = $check_result->fetch_assoc(); // Debugging
+        error_log("Existing booking found: " . json_encode($existingBooking)); // Debug log
         header("Location: booking.php?error=" . urlencode("You already have an active booking."));
         exit();
     }
+    $check_query->close();
 
     // Combine selected services into a single string for storage
     $services_string = implode(', ', $services);
 
     // Prepare the SQL query to insert the booking into the database
-    $query = "INSERT INTO bookings (username, email, mobile, services, appointment_time, total_duration, end_time, status, created_at) 
-              VALUES ('$username', '$email', '$mobile', '$services_string', '$appointment_time', $total_duration, '$end_time', 'pending', NOW())";
+    $query = $conn->prepare(
+        "INSERT INTO bookings (username, email, mobile, services, appointment_time, total_duration, end_time, status, created_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())"
+    );
+    $query->bind_param("sssssis", $username, $email, $mobile, $services_string, $appointment_time, $total_duration, $end_time);
 
     // Execute the query and check if it was successful
-    if (mysqli_query($conn, $query)) {
+    if ($query->execute()) {
         // Redirect to booking page with success message
         header("Location: booking.php?success=1");
         exit();
     } else {
         // Redirect with an error message if there was a problem
-        header("Location: booking.php?error=" . urlencode("Database Error: " . mysqli_error($conn)));
+        header("Location: booking.php?error=" . urlencode("Database Error: " . $query->error));
         exit();
     }
 } else {

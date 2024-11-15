@@ -71,11 +71,6 @@ if ($isLoggedIn && $email) {
                    class="mt-6 inline-block bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600">
                    Book Now
                 </a>
-            <?php elseif ($isLoggedIn && $hasBooking): ?>
-                <a href="./booking/my_appointment.php" 
-                   class="mt-6 inline-block bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600">
-                   View My Appointment
-                </a>
             <?php else: ?>
                 <a href="./user/login.php" class="mt-6 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
                    Login to Book Now

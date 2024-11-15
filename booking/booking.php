@@ -5,9 +5,8 @@ session_start();
 // Database connection (adjust path as needed)
 include('../includes/db.php');
 
-// Check if user is logged in (make sure the session has the username)
+// Check if user is logged in
 if (!isset($_SESSION['username'])) {
-    // Redirect to login page if not logged in
     header("Location: ../user/login.php");
     exit();
 }
@@ -15,13 +14,15 @@ if (!isset($_SESSION['username'])) {
 // Get user details from the session
 $username = $_SESSION['username'];
 
-// Get email from the users table
+// Fetch user email
 $email_query = "SELECT email FROM users WHERE username = '$username' LIMIT 1";
 $email_result = mysqli_query($conn, $email_query);
+
 if ($email_result && mysqli_num_rows($email_result) > 0) {
     $email_row = mysqli_fetch_assoc($email_result);
     $email = $email_row['email'];
 } else {
+    error_log("Error: Unable to retrieve email for user $username");
     echo "Error: Unable to retrieve email.";
     exit();
 }
@@ -29,7 +30,17 @@ if ($email_result && mysqli_num_rows($email_result) > 0) {
 // Check if the user already has a booking
 $existingBookingQuery = "SELECT * FROM bookings WHERE email = '$email' AND status IN ('pending', 'confirmed') LIMIT 1";
 $existingBookingResult = mysqli_query($conn, $existingBookingQuery);
-$hasBooking = ($existingBookingResult && mysqli_num_rows($existingBookingResult) > 0);
+
+if (!$existingBookingResult) {
+    error_log("Query Error: " . mysqli_error($conn));
+    $hasBooking = false;
+} else {
+    $hasBooking = (mysqli_num_rows($existingBookingResult) > 0);
+    if ($hasBooking) {
+        $existingBooking = mysqli_fetch_assoc($existingBookingResult);
+        error_log("Existing booking found for $email: " . json_encode($existingBooking));
+    }
+}
 
 // Check for success message
 $successMessage = isset($_GET['success']) && $_GET['success'] == 1;
@@ -54,27 +65,27 @@ $successMessage = isset($_GET['success']) && $_GET['success'] == 1;
 
 <main class="py-10">
     <div class="max-w-xl mx-auto bg-white shadow-lg p-8 rounded-lg">
-        <?php if ($hasBooking): ?>
-            <script>
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Appointment Already Booked',
-                    text: 'You already have an appointment booked. Please view or manage your appointment.',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.href = 'my_appointment.php'; // Redirect to "My Appointment" page
-                });
-            </script>
-        <?php elseif ($successMessage): ?>
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Your appointment has been booked successfully.',
-                    confirmButtonText: 'OK'
-                });
-            </script>
-        <?php endif; ?>
+    <?php if ($hasBooking): ?>
+        <script>
+            Swal.fire({
+                icon: 'info',
+                title: 'Appointment Already Booked',
+                text: 'You already have an appointment booked. Please view or manage your appointment.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'my_appointment.php';
+            });
+        </script>
+    <?php elseif ($successMessage): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Your appointment has been booked successfully.',
+                confirmButtonText: 'OK'
+            });
+        </script>
+    <?php endif; ?>
 
         <form action="submit_booking.php" method="POST" class="space-y-6">
             <div>

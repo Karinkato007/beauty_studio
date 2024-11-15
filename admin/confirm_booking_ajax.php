@@ -1,44 +1,47 @@
 <?php
 include('../includes/db.php');
 
-// Check if the booking ID is provided
-if (isset($_POST['id'])) {
-    $bookingId = $_POST['id'];
+// Check if the request method is POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Retrieve the booking ID from the POST request
+    $bookingId = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
-    // Fetch the current booking details to calculate end_time
-    $stmt = $conn->prepare("SELECT appointment_time, total_duration FROM bookings WHERE id = ?");
-    $stmt->bind_param("i", $bookingId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $booking = $result->fetch_assoc();
+    // Log the received booking ID (for debugging)
+    error_log("Received Booking ID: " . $bookingId);
 
-    if ($booking) {
-        // Calculate end_time by adding total_duration to appointment_time
-        $appointmentTime = new DateTime($booking['appointment_time']);
-        $endTime = $appointmentTime->add(new DateInterval('PT' . $booking['total_duration'] . 'M'));
+    if ($bookingId > 0) {
+        // Prepare the SQL query to update booking status to 'confirmed'
+        $query = "UPDATE bookings SET status = 'confirmed' WHERE id = ?";
+        $stmt = $conn->prepare($query);
 
-        // Update the booking status to 'confirmed' and set the end_time
-        $updateStmt = $conn->prepare("UPDATE bookings SET status = 'confirmed', end_time = ? WHERE id = ?");
-        $updateStmt->bind_param("si", $endTime->format('Y-m-d H:i:s'), $bookingId);
-
-        if ($updateStmt->execute()) {
-            // Return success response
-            echo json_encode(['success' => true]);
-        } else {
-            // Return failure response
-            echo json_encode(['success' => false, 'message' => 'Failed to update booking status.']);
+        // Check for query preparation errors
+        if (!$stmt) {
+            error_log("SQL Preparation Error: " . $conn->error);
+            echo json_encode(['success' => false, 'message' => 'Failed to prepare the SQL query.']);
+            exit;
         }
 
-        $updateStmt->close();
+        // Bind the parameter (booking ID) and execute the query
+        $stmt->bind_param("i", $bookingId);
+
+        // Execute the query and check if it was successful
+        if ($stmt->execute()) {
+            // Return a success response
+            echo json_encode(['success' => true]);
+        } else {
+            // Return error message with error details
+            error_log("SQL Execution Error: " . $stmt->error);
+            echo json_encode(['success' => false, 'message' => 'Database update failed: ' . $stmt->error]);
+        }
+
+        // Close the prepared statement
+        $stmt->close();
     } else {
-        // Return failure if booking does not exist
-        echo json_encode(['success' => false, 'message' => 'Booking not found.']);
+        // Invalid booking ID, return an error message
+        echo json_encode(['success' => false, 'message' => 'Invalid booking ID.']);
     }
-
-    $stmt->close();
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid booking ID.']);
+    // Invalid request method (not POST)
+    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }
-
-$conn->close();
 ?>
