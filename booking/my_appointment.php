@@ -66,9 +66,13 @@ if (isset($_POST['cancel_booking'])) {
     <title>My Appointment</title>
 </head>
 <body class="bg-gray-100">
-    <header class="bg-pink-600 text-white p-5 shadow-md">
-        <h1 class="text-center text-3xl font-bold">My Appointment</h1>
+    <header class="bg-pink-600 text-white p-5 shadow-md flex items-center justify-between">
+    <a href="../index.php" >
+                    <span class="font-bold text-3xl">Beauty Studio</span>    
+                </a>
+        <h1 class="text-center text-3xl font-bold flex-1">My Appointment</h1>
     </header>
+
 
     <main class="py-10">
         <div class="max-w-xl mx-auto bg-white shadow-lg p-8 rounded-lg">

@@ -22,8 +22,9 @@ header("Expires: 0");
     <title>Manage Stock</title>
 </head>
 <body class="bg-gray-100">
-    <header class="bg-gray-800 text-white p-5">
-        <h1 class="text-center text-3xl">Manage Stock</h1>
+<header class="bg-gray-800 text-white p-5 flex items-center justify-between">
+        <a href="./admin.php" ><span class="font-bold text-2xl">BACK</span></a>
+        <h1 class="text-center text-3xl flex-1">Manage Stocks</h1>
     </header>
 
     <main class="py-10">

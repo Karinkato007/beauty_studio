@@ -11,15 +11,15 @@ if (!$conn) {
 if (isset($_POST['id'])) {
     $bookingId = mysqli_real_escape_string($conn, $_POST['id']);
 
-    // Prepare query to update status to 'canceled'
-    $query = "UPDATE bookings SET status = 'canceled' WHERE id = ?";
+    // Prepare query to update status to 'pending'
+    $query = "UPDATE bookings SET status = 'pending' WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $bookingId);
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Booking canceled successfully.']);
+        echo json_encode(['success' => true, 'message' => 'Booking set to pending.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to cancel booking.']);
+        echo json_encode(['success' => false, 'message' => 'Failed to set booking to pending.']);
     }
     $stmt->close();
 } else {
